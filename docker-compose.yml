@@ -1,0 +1,13 @@
+services:
+  bot:
+    build: ./
+    container_name: margin_game_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+      - creds.json
+    volumes:
+      - margin_game_data:/bot/data
+
+volumes:
+  margin_game_data:
