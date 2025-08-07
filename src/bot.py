@@ -260,6 +260,19 @@ async def send_handler(message: Message):
         photo_file.seek(0)
     await broadcast(" ".join(args), photo=BufferedInputFile(photo_file.read(), filename="photo.png") if photo else None)
 
+@dp.message(Command("stat"), IsAdminFilter())
+async def stats_handler(message: Message):
+    text = "Топ команд:\n\n"
+    for i, team in enumerate(sorted(user_teams.values(), key=lambda x: x.total_score, reverse=True), 1):
+        text += f"{i}. {team.name} ({team.total_score}) [{team.id}]\n"
+    text += "\nКомпании:"
+    for position in ALL_POSITIONS:
+        position_history = game.history.get(position.id, None)
+        if not position_history:
+            continue
+        text += f"\n\n{position.name}:\n" + "\n".join([f"{round}. {round_data[1]}x ({round_data[0]})" for round, round_data in position_history.items()])
+    await message.answer(text)
+
 @dp.message(Command("help"), IsAdminFilter())
 async def help_handler(message: Message):
     await message.answer(
@@ -271,6 +284,7 @@ async def help_handler(message: Message):
         "\n/quiz_results - Огласить результаты квиза"
         "\n/send [TEXT or PHOTO] - Отправка рассылки всем участникам"
         "\n/multiply [ID КОМАНДЫ] [АКТИВ: 1-2] [МУЛЬТИПЛИКАТОР] - Мультипликация актива команды"
+        "\n/stat - Текстовое представление табличной статистики"
         "\n/qrs [QR_COUNT] - Генерация QR-кодов для регистрации"
     )
 
